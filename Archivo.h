@@ -1,3 +1,8 @@
+/*  
+    Archivo encargado de leer el mapa en formato txt   
+    @author Gabo 
+*/
+
 #include <iostream>
 #include <string>  // nombre archivo
 #include <fstream> // leer archivo
