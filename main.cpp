@@ -10,7 +10,7 @@ using namespace std;
 int main()
 {
     // nombre del archivo que contiene el mapa
-    string nombreArchivo = "ag1.txt";
+    string nombreArchivo = "./archivos/ag1.txt";
 
     // crea el objeto archivo
     Archivo archivo(nombreArchivo);
