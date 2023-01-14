@@ -22,12 +22,16 @@ int main()
 
     
     //mundo.moverDerecha();
-    //mundo.moverDerecha();
+    mundo.moverDerecha();
 
     //mundo.moverIzquierda();
-    //mundo.moverSaltoAlto();
+    mundo.moverSaltoAlto();
+    mundo.moverDerecha();
+    mundo.moverDerecha();
+
     //mundo.getEstadoMario();
-    mundo.moverSaltolargo();
+    //mundo.moverSaltolargo();
+    mundo.getMovimientosMario();
    mundo.imprimirMapa();
 
 

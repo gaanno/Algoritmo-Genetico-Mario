@@ -1,19 +1,12 @@
 /*
-    Mundo encargado de leer el mapa en formato txt
+    Archivo encargado de leer el mapa en formato txt y de manejar el movimiento
     @author Gabriel Norambuena
 */
 
-/* reglas del movimiento
-0 representa casilla libre: Mario puede avanzar a esa casilla.
-1 representa casilla impenetrable: Mario no puede avanzar a esa casilla.
-2 representa enemigo: Mario muere si avanza a esa casilla (excepto por arriba).
-3 representa la posición de Mario para comenzar (única, debe estar en coordenada 0 de x).
-*/
-
 #include <iostream>
-#include <string>  // nombre mundo
-#include <fstream> // leer mundo
-#include <sstream> // convertir string a int
+#include <string>  
+#include <fstream> 
+#include <sstream> 
 #include <vector>
 
 using namespace std;
@@ -38,40 +31,41 @@ public:
     void moverIzquierda();
     void moverSaltoAlto();
     void moverSaltolargo();
+    void getMovimientosMario();
 
     // relacionado con mario
     void getPosicionActual();
     void getEstadoMario();
 
+
 private:
-    // _______________________________ relacionado con el mundo _______________________________
+    //  relacionado con el mundo 
     string nombreMundo;
     int largoMundo;
     int anchoMundo;
     int bloqueReemplazado; // bloque que es reemplazado cuando mario se mueve en el
     int **mapa = nullptr;
-    // _____________________________________________________________________________________
 
-    // _______________________________ relacionado con mario _______________________________
-    int posicionActual[2];
-    int enemigosDerrotados = 0;
+    //  relacionado con mario 
     // posicionAnterior: derecha, izquierda, arriba, abajo, es la posicion anterior de mario para saber de donde proviene
     // util para el enfrentamiento de un enemigo
     string posicionAnterior = "inicio";
     string estadoMario = "vivo";
-    void actualizarPosicionMario(int fila, int columna);
+    int posicionActual[2]; // coordenadas fila, columna
+    int enemigosDerrotados = 0;
     void setEstadoMario(string estado);
-    // _____________________________________________________________________________________
 
-    // _______________________________ relacionado con el movimiento _______________________________
+    //  relacionado con el movimiento 
     bool movimientoEjecutandose = false;
     int movimientosRestantes = 0;
+    vector<char> movimientosMario;
     void checkeoGravedad();
     void checkeoColisiones();
     void comprobacionInicialMario();
     void checkeoColisionLimites();
     void checkeoColisionEnemigos();
     void alternarEstadoMovimiento();
+    void actualizarPosicionMario(int fila, int columna);
 
     // realiza el movimiento en 1 bloque
     void movimientoUnitarioArriba();
@@ -254,6 +248,7 @@ void Mundo::alternarEstadoMovimiento()
  */
 void Mundo::moverDerecha()
 {
+    movimientosMario.push_back('d');
     movimientoEjecutandose = true;
     movimientosRestantes = 1;
     movimientoUnitarioDerecha();
@@ -265,6 +260,7 @@ void Mundo::moverDerecha()
  */
 void Mundo::moverIzquierda()
 {
+    movimientosMario.push_back('i');
     movimientoEjecutandose = true;
     movimientosRestantes = 1;
     movimientoUnitarioIzquierda();
@@ -273,6 +269,7 @@ void Mundo::moverIzquierda()
 
 void Mundo::moverSaltoAlto()
 {
+    movimientosMario.push_back('s');
     movimientoEjecutandose = true;
     movimientosRestantes = 5;
     // +1 eje y → +1 eje y → +1 eje x → -1 eje y → -1 eje y.
@@ -292,6 +289,7 @@ void Mundo::moverSaltoAlto()
 
 void Mundo::moverSaltolargo()
 {
+    movimientosMario.push_back('j');
     movimientoEjecutandose = true;
     movimientosRestantes = 5;
     // +1 eje y → +1 eje x → +1 eje x → -1 eje x → -1 eje y.
@@ -419,5 +417,13 @@ void Mundo::checkeoGravedad()
     {
         posicionAnterior = "arriba";
         actualizarPosicionMario(posicionActual[0] + 1, posicionActual[1]);
+    }
+}
+
+void Mundo::getMovimientosMario()
+{
+    for (int i = 0; i < movimientosMario.size(); i++)
+    {
+        cout << movimientosMario[i] << " ";
     }
 }
