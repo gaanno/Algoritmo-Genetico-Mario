@@ -45,6 +45,7 @@ private:
     int anchoMundo;
     int bloqueReemplazado; // bloque que es reemplazado cuando mario se mueve en el
     int **mapa = nullptr;
+    void restablecerAjustes();
 
     //  relacionado con mario 
     // posicionAnterior: derecha, izquierda, arriba, abajo, es la posicion anterior de mario para saber de donde proviene
@@ -52,7 +53,6 @@ private:
     string posicionAnterior = "inicio";
     string estadoMario = "vivo";
     int posicionActual[2]; // coordenadas fila, columna
-    int enemigosDerrotados = 0;
     void setEstadoMario(string estado);
 
     //  relacionado con el movimiento 
@@ -212,6 +212,7 @@ void Mundo::setEstadoMario(string estado)
     estadoMario = estado;
     getEstadoMario();
     codigoEjecutandose = false;
+    restablecerAjustes();
 }
 
 /**
@@ -426,4 +427,13 @@ void Mundo::getMovimientosMario()
     {
         cout << movimientosMario[i] << " ";
     }
+}
+
+void Mundo::restablecerAjustes(){
+    posicionAnterior = "inicio";
+    estadoMario = "vivo";
+    movimientoEjecutandose = false;
+    movimientosRestantes = 0;
+    movimientosMario.clear();
+    abrirMundo();
 }
