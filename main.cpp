@@ -3,28 +3,23 @@
 
 #include <iostream>
 #include <string>
-#include "Archivo.h"
-#include "Movimiento.h"
+#include "Mundo.h"
 
 using namespace std;
 
 int main()
 {
     // nombre del archivo que contiene el mapa
+    // al terminar hay que cambiarlo por world.txt
     string nombreArchivo = "./archivos/ag2.txt";
 
     // crea objetos
-    Archivo archivo(nombreArchivo);
-    Movimiento movimiento;
+    Mundo mundo(nombreArchivo);
 
-    // Lee el archivo y crea el mapa
-    archivo.abrirArchivo();
-
-    // setea la posicion inicial
-    movimiento.setPosicionActual(archivo.posicionInicial[0], archivo.posicionInicial[1]);
-
-    cout << "Largo: " << archivo.largo << endl;
-    cout << "Ancho: " << archivo.ancho << endl;
-    archivo.imprimirMapa();
+    // mundo.moverDerecha();
+    mundo.abrirMundo();
+    mundo.imprimirMapa();
+    mundo.moverDerecha();
+    // movimiento.getEstadoMario();
     return 0;
 }
