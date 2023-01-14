@@ -27,6 +27,7 @@ class Mundo
 public:
     // constructor
     Mundo(string nombreMundo);
+    bool codigoEjecutandose = true;
 
     // relacionado con el mundo
     void abrirMundo();
@@ -36,37 +37,48 @@ public:
     // relacionado con el movimiento
     void moverDerecha();
     void moverIzquierda();
-    void moverArriba();
-    void moverAbajo();
+    void moverSaltoAlto();
+    void moverSaltolargo();
 
     // relacionado con mario
     void getPosicionActual();
     void getEstadoMario();
 
 private:
-    // relacionado con el mundo
+    // _______________________________ relacionado con el mundo _______________________________
     string nombreMundo;
     int largoMundo;
     int anchoMundo;
     int bloqueReemplazado; // bloque que es reemplazado cuando mario se mueve en el
     int **mapa = nullptr;
+    // _____________________________________________________________________________________
 
-    // relacionado con mario
+    // _______________________________ relacionado con mario _______________________________
     int posicionActual[2];
-    
+    int enemigosDerrotados = 0;
     // posicionAnterior: derecha, izquierda, arriba, abajo, es la posicion anterior de mario para saber de donde proviene
     // util para el enfrentamiento de un enemigo
-    string posicionAnterior; 
+    string posicionAnterior = "inicio";
     string estadoMario = "vivo";
     void actualizarPosicionMario(int fila, int columna);
     void setEstadoMario(string estado);
+    // _____________________________________________________________________________________
 
-    // relacionado con el movimiento
+    // _______________________________ relacionado con el movimiento _______________________________
+    bool movimientoEjecutandose = false;
+    int movimientosRestantes = 0;
     void checkeoGravedad();
     void checkeoColisiones();
     void comprobacionInicialMario();
     void checkeoColisionLimites();
     void checkeoColisionEnemigos();
+    void alternarEstadoMovimiento();
+
+    // realiza el movimiento en 1 bloque
+    void movimientoUnitarioArriba();
+    void movimientoUnitarioAbajo();
+    void movimientoUnitarioDerecha();
+    void movimientoUnitarioIzquierda();
 };
 
 /**
@@ -147,6 +159,7 @@ void Mundo::crearMapa()
  */
 void Mundo::imprimirMapa()
 {
+    cout << endl;
     for (int i = 0; i < anchoMundo; i++)
     {
         for (int j = 0; j < largoMundo; j++)
@@ -158,61 +171,11 @@ void Mundo::imprimirMapa()
 }
 
 /**
- * Realiza un movimiento hacia la derecha
- */
-void Mundo::moverDerecha()
-{
-    posicionAnterior = "izquierda";
-    int fila = posicionActual[0];
-    int columna = posicionActual[1] + 1;
-    actualizarPosicionMario(fila, columna);
-}
-
-/**
  * Obtiene la posicion de mario
  */
 void Mundo::getPosicionActual()
 {
     cout << "Posicion actual: " << posicionActual[0] << " " << posicionActual[1] << endl;
-}
-
-/**
- * Actualiza la posicion de mario en el mapa
- */
-void Mundo::actualizarPosicionMario(int fila, int columna)
-{
-    bloqueReemplazado = mapa[fila][columna];
-    mapa[posicionActual[0]][posicionActual[1]] = 0;
-    posicionActual[0] = fila;
-    posicionActual[1] = columna;
-    mapa[fila][columna] = 3;
-    checkeoColisiones();
-}
-
-/**
- * Comprueba si mario esta volando
- */
-void Mundo::checkeoGravedad()
-{
-    // si mario esta en el aire cae a 1 bloque x ejecucion
-
-    if (posicionActual[0] != anchoMundo - 1 && mapa[posicionActual[0] + 1][posicionActual[1]] == 0)
-    {
-        actualizarPosicionMario(posicionActual[0] + 1, posicionActual[1]);
-    }
-}
-
-/**
- * Comprueba las colisiones de mario con su entorno
- * - colision bordes
- * - colision enemigo
- * - gravedad
- */
-void Mundo::checkeoColisiones()
-{
-    checkeoColisionLimites();
-    checkeoGravedad();
-    checkeoColisionEnemigos();
 }
 
 /**
@@ -224,16 +187,20 @@ void Mundo::checkeoColisionLimites()
 {
     // si en el borde derecho no hay piso no importa, segun el pdf
     // el objetivo es solo llegar al final de la matriz segun mi interpretacion - gabo
-    if (posicionActual[1] == largoMundo - 1)
+    if (estadoMario == "vivo")
     {
-        setEstadoMario("Ganador");
-    }
-    // mario muere si se cae al vacio
-    else if (posicionActual[0] == anchoMundo - 1)
-    {
-        setEstadoMario("Muerto: caida al vacio");
+        if (posicionActual[1] == largoMundo - 1)
+        {
+            setEstadoMario("Ganador");
+        }
+        // mario muere si se cae al vacio
+        else if (posicionActual[0] == anchoMundo - 1)
+        {
+            setEstadoMario("Muerto: caida al vacio");
+        }
     }
 }
+
 /**
  * Obtiene el estado de mario
  *
@@ -250,6 +217,8 @@ void Mundo::getEstadoMario()
 void Mundo::setEstadoMario(string estado)
 {
     estadoMario = estado;
+    getEstadoMario();
+    codigoEjecutandose = false;
 }
 
 /**
@@ -257,12 +226,199 @@ void Mundo::setEstadoMario(string estado)
  */
 void Mundo::comprobacionInicialMario()
 {
-    actualizarPosicionMario(posicionActual[0], posicionActual[1]);
+    actualizarPosicionMario(posicionActual[0] + 1, posicionActual[1]);
 }
 
+/**
+ * Comprueba si mario choco con un enemigo
+ */
 void Mundo::checkeoColisionEnemigos()
 {
-    if(bloqueReemplazado == 2 && posicionAnterior != "arriba"){
+    if (estadoMario == "vivo" && bloqueReemplazado == 2 && posicionAnterior != "arriba")
+    {
         setEstadoMario("Muerto: choco con un enemigo desde " + posicionAnterior);
+    }
+}
+
+/**
+ * Cambia el estado de movimiento
+ * si se esta ejecutando lo detiene y viceversa
+ */
+void Mundo::alternarEstadoMovimiento()
+{
+    movimientoEjecutandose = !movimientoEjecutandose;
+}
+
+// MOVIMIENTO ------------------------------------------------------------------
+/**
+ * Realiza un movimiento hacia la derecha
+ */
+void Mundo::moverDerecha()
+{
+    movimientoEjecutandose = true;
+    movimientosRestantes = 1;
+    movimientoUnitarioDerecha();
+    movimientoEjecutandose = false;
+}
+
+/**
+ * Realiza un movimiento hacia la izquierda
+ */
+void Mundo::moverIzquierda()
+{
+    movimientoEjecutandose = true;
+    movimientosRestantes = 1;
+    movimientoUnitarioIzquierda();
+    movimientoEjecutandose = false;
+}
+
+void Mundo::moverSaltoAlto()
+{
+    movimientoEjecutandose = true;
+    movimientosRestantes = 5;
+    // +1 eje y → +1 eje y → +1 eje x → -1 eje y → -1 eje y.
+    // +2 y
+    movimientoUnitarioArriba();
+    movimientoUnitarioArriba();
+
+    // +1 x
+    movimientoUnitarioDerecha();
+
+    // -2 y
+    movimientoUnitarioAbajo();
+    movimientoUnitarioAbajo();
+
+    movimientoEjecutandose = false;
+}
+
+void Mundo::moverSaltolargo()
+{
+    movimientoEjecutandose = true;
+    movimientosRestantes = 5;
+    // +1 eje y → +1 eje x → +1 eje x → -1 eje x → -1 eje y.
+
+    // +1 y
+    movimientoUnitarioArriba();
+
+    // +3 x
+    movimientoUnitarioDerecha();
+    movimientoUnitarioDerecha();
+    movimientoUnitarioDerecha();
+
+    // -1 y
+    movimientoUnitarioAbajo();
+
+    movimientoEjecutandose = false;
+}
+
+void Mundo::movimientoUnitarioArriba()
+{
+    if (movimientoEjecutandose)
+    {
+        getPosicionActual();
+        posicionAnterior = "abajo";
+        int fila = posicionActual[0] - 1;
+        int columna = posicionActual[1];
+        actualizarPosicionMario(fila, columna);
+    }
+}
+
+void Mundo::movimientoUnitarioAbajo()
+{
+    if (movimientoEjecutandose)
+    {
+        posicionAnterior = "arriba";
+        int fila = posicionActual[0] + 1;
+        int columna = posicionActual[1];
+        actualizarPosicionMario(fila, columna);
+    }
+}
+
+void Mundo::movimientoUnitarioDerecha()
+{
+    if (movimientoEjecutandose)
+    {
+        posicionAnterior = "izquierda";
+        int fila = posicionActual[0];
+        int columna = posicionActual[1] + 1;
+        actualizarPosicionMario(fila, columna);
+    }
+}
+
+void Mundo::movimientoUnitarioIzquierda()
+{
+    if (movimientoEjecutandose)
+    {
+        posicionAnterior = "derecha";
+        int fila = posicionActual[0];
+        int columna = posicionActual[1] - 1;
+        actualizarPosicionMario(fila, columna);
+    }
+}
+
+// MOVIMIENTO ------------------------------------------------------------------
+/***
+ * Actualiza la posicion de mario en el mapa
+ *
+ */
+void Mundo::actualizarPosicionMario(int fila, int columna)
+{
+    // movimientos que quedan por mover
+    movimientosRestantes--;
+
+    if (movimientosRestantes == 0)
+    {
+        movimientoEjecutandose = false;
+    }
+
+    if ((fila < 0 && posicionAnterior == "derecha") || (fila < 0 && posicionAnterior == "abajo"))
+    {
+        // limite izquierda o derecho, no lo muevo
+        movimientoEjecutandose = false;
+        movimientosRestantes = 0;
+        checkeoColisiones();
+        // cout << "limite izquierdo o superior" << endl;
+        return;
+    }
+
+    else if (mapa[fila][columna] != 1)
+    {
+        bloqueReemplazado = mapa[fila][columna];
+        //cout << "Bloque reemplazado: " << bloqueReemplazado << endl;
+        mapa[posicionActual[0]][posicionActual[1]] = 0;
+        posicionActual[0] = fila;
+        posicionActual[1] = columna;
+        mapa[fila][columna] = 3;
+        imprimirMapa();
+    }
+    else
+    {
+        //cout << "choque bloque 1, bajando..." << endl;
+        movimientosRestantes = 0;
+        movimientoEjecutandose = false;
+    }
+    checkeoColisiones();
+}
+
+/**
+ * Comprueba las colisiones de mario con su entorno
+ */
+void Mundo::checkeoColisiones()
+{
+    checkeoColisionLimites();
+    checkeoGravedad();
+    checkeoColisionEnemigos();
+}
+
+/**
+ * Comprueba si mario esta volando
+ */
+void Mundo::checkeoGravedad()
+{
+    // si mario esta en el aire o sobre enemigo cae a 1 bloque x ejecucion
+    if (estadoMario == "vivo" && !movimientoEjecutandose && mapa[posicionActual[0] + 1][posicionActual[1]] != 1)
+    {
+        posicionAnterior = "arriba";
+        actualizarPosicionMario(posicionActual[0] + 1, posicionActual[1]);
     }
 }

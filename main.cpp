@@ -17,14 +17,18 @@ int main()
     Mundo mundo(nombreArchivo);
 
     // mundo.moverDerecha();
-    cout << "------------ Mapa inicial ------------" << endl;
     mundo.abrirMundo();
-    mundo.imprimirMapa();
+    //mundo.imprimirMapa();
 
-    cout << "------------ Mapa luego de mover a la derecha ------------" << endl;
-    mundo.moverDerecha();
-    mundo.getEstadoMario();
-    mundo.imprimirMapa();
+    
+    //mundo.moverDerecha();
+    //mundo.moverDerecha();
+
+    //mundo.moverIzquierda();
+    //mundo.moverSaltoAlto();
+    //mundo.getEstadoMario();
+    mundo.moverSaltolargo();
+   mundo.imprimirMapa();
 
 
     // movimiento.getEstadoMario();
