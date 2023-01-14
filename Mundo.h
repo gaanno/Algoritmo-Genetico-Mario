@@ -18,7 +18,9 @@
 
 using namespace std;
 
-// clase para manipular el mapa
+/**
+ * Clase encargada de manejar el mundo
+ */
 class Mundo
 {
 public:
@@ -27,8 +29,8 @@ public:
 
     // relacionado con el mundo
     void abrirMundo();
-    void imprimirMapa();
     void crearMapa();
+    void imprimirMapa();
 
     // relacionado con el movimiento
     void moverDerecha();
@@ -50,23 +52,27 @@ private:
     // relacionado con mario
     int posicionActual[2];
     string estadoMario = "vivo";
+    void actualizarPosicionMario(int fila, int columna);
+    void setEstadoMario(string estado);
 
+    // relacionado con el movimiento
     bool checkeoMovimientoValido(char movimiento);
     void checkeoGravedad();
     void checkeoColisiones();
-    void actualizarPosicionMario(int fila, int columna);
-    void matarMario();
-    void comprobarPosicionActual();
     void comprobacionInicialMario();
-    void setEstadoMario(string estado);
 };
 
-// constructor
+/**
+ * Constructor de la clase
+ */
 Mundo::Mundo(string nombreMundo)
 {
     this->nombreMundo = nombreMundo;
 }
 
+/**
+ * Abre el mundo y lo carga en memoria
+ */
 void Mundo::abrirMundo()
 {
     // abre el mundo
@@ -129,7 +135,9 @@ void Mundo::crearMapa()
     }
 }
 
-// imprime el mapa
+/**
+ * Imprime el mapa
+ */
 void Mundo::imprimirMapa()
 {
     for (int i = 0; i < anchoMundo; i++)
@@ -142,18 +150,24 @@ void Mundo::imprimirMapa()
     }
 }
 
+/**
+ * Realiza un movimiento hacia la derecha
+ */
 void Mundo::moverDerecha()
 {
     if (checkeoMovimientoValido('d'))
     {
         int fila = posicionActual[0];
-        int columna = posicionActual[1];
+        int columna = posicionActual[1] + 1;
         actualizarPosicionMario(fila, columna);
     }
 }
 
-// falta agregar restricciones
-// comprobar limite mapa
+/**
+ * Verifica si el movimiento  a realizar es valido
+ * @param movimiento es el tipo de movimiento a realizar
+ * @return true si el movimiento es valido, false si no lo es
+ */
 bool Mundo::checkeoMovimientoValido(char movimiento)
 {
     switch (movimiento)
@@ -169,13 +183,17 @@ bool Mundo::checkeoMovimientoValido(char movimiento)
     return false;
 }
 
+/**
+ * Obtiene la posicion de mario
+ */
 void Mundo::getPosicionActual()
 {
     cout << "Posicion actual: " << posicionActual[0] << " " << posicionActual[1] << endl;
 }
 
-// actualiza la posicion de mario
-//  falta checkeo gravedad
+/**
+ * Actualiza la posicion de mario en el mapa
+ */
 void Mundo::actualizarPosicionMario(int fila, int columna)
 {
     mapa[posicionActual[0]][posicionActual[1]] = 0;
@@ -185,6 +203,9 @@ void Mundo::actualizarPosicionMario(int fila, int columna)
     checkeoColisiones();
 }
 
+/**
+ * Comprueba si mario esta volando
+ */
 void Mundo::checkeoGravedad()
 {
     if (mapa[posicionActual[0] + 1][posicionActual[1]] == 0)
@@ -193,12 +214,9 @@ void Mundo::checkeoGravedad()
     }
 }
 
-void Mundo::matarMario()
-{
-    estadoMario = "Muerto";
-    cout << "Mario murio" << endl;
-}
-
+/**
+ * Comprueba las colisiones de mario con el mapa
+ */
 void Mundo::checkeoColisiones()
 {
     // mario muere si se cae al vacio
@@ -211,24 +229,36 @@ void Mundo::checkeoColisiones()
     {
         setEstadoMario("Ganador");
     }
-    else
+    if (posicionActual[0] != anchoMundo - 1 && mapa[posicionActual[0] + 1][posicionActual[1]] == 0)
     {
-        // si mario esta en el aire cae a 1 bloque x segundo
-        // se puede saltar el ciclo pero para darle emocion...
+        // si mario esta en el aire cae a 1 bloque x ejecucion
         checkeoGravedad();
     }
 }
 
+/**
+ * Obtiene el estado de mario
+ *
+ */
 void Mundo::getEstadoMario()
 {
     cout << estadoMario << endl;
 }
 
+/**
+ * Cambia el estado de mario
+ * @param estado nuevo estado de mario
+ */
 void Mundo::setEstadoMario(string estado)
 {
     estadoMario = estado;
     getEstadoMario();
 }
+
+/**
+ * realiza una comprobacion inicial para ver si mario esta flotando
+ * @return void
+ */
 void Mundo::comprobacionInicialMario()
 {
     actualizarPosicionMario(posicionActual[0], posicionActual[1]);

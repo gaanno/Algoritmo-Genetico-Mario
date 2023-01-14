@@ -19,7 +19,9 @@ int main()
     // mundo.moverDerecha();
     mundo.abrirMundo();
     mundo.imprimirMapa();
-    mundo.moverDerecha();
+    mundo.getEstadoMario();
+
+
     // movimiento.getEstadoMario();
     return 0;
 }
