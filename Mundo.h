@@ -1,7 +1,6 @@
 /*
     Mundo encargado de leer el mapa en formato txt
-    @author Gabo
-    @author Johan
+    @author Gabriel Norambuena
 */
 
 /* reglas del movimiento
