@@ -1,6 +1,6 @@
-/*  
-    Archivo encargado de leer el mapa en formato txt   
-    @author Gabo 
+/*
+    Archivo encargado de leer el mapa en formato txt
+    @author Gabo
 */
 
 #include <iostream>
@@ -18,9 +18,11 @@ public:
     int largo;
     int ancho;
     int **mapa;
+    int posicionInicial[2];
     void abrirArchivo();
     void imprimirMapa();
     void crearMapa();
+    void actualizarMapa(int **nuevoMapa);
     Archivo(std::string nombreArchivo);
 };
 
@@ -65,6 +67,13 @@ void Archivo::abrirArchivo()
 
             while (ss >> numero)
             {
+                // posicion de inicio
+                if (numero == 3)
+                {
+                    posicionInicial[0] = numeroLinea - 2;
+                    posicionInicial[1] = contador;
+                }
+
                 mapa[numeroLinea - 2][contador] = numero;
                 contador++;
             }
@@ -94,4 +103,9 @@ void Archivo::imprimirMapa()
         }
         cout << endl;
     }
+}
+
+void Archivo::actualizarMapa(int **nuevoMapa)
+{
+    mapa = nuevoMapa;
 }
