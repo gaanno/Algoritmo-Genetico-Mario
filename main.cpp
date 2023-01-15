@@ -46,8 +46,7 @@ int main()
     {
         imprimirVector(solucionesValidas[indice]);
     }
-    cout << "Numero soluciones validas: " << solucionesValidas.size() << endl;
-    cout  << "largo: "<< solucionesValidas.size();
+//    cout << "Numero soluciones validas: " << solucionesValidas.size() << endl;
     // imprime las soluciones validas verificadas
 
     // movimiento.getEstadoMario();
