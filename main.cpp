@@ -11,8 +11,8 @@
 using namespace std;
 
 double uniformRate = 0.2;
-double mutationRate = 0.815;
-double crossRate = 0.8;
+double mutationRate = 0.2;
+double crossRate = 0.4;
 int tournamentSize = 5;
 bool elitism = true;
 
@@ -30,7 +30,7 @@ bool comparar(vector<char> solucion1, vector<char> solucion2);
 int main()
 {
     srand(time(NULL));
-    string nombreArchivo = "./archivos/ag2.txt";
+    string nombreArchivo = "./world.txt";
     Mundo mundo(nombreArchivo);
     vector<vector<char>> solucionesParciales;
     vector<vector<char>> poblacionInicial;
