@@ -4,9 +4,9 @@
 */
 
 #include <iostream>
-#include <string>  
-#include <fstream> 
-#include <sstream> 
+#include <string>
+#include <fstream>
+#include <sstream>
 #include <vector>
 
 using namespace std;
@@ -19,12 +19,17 @@ class Mundo
 public:
     // constructor
     Mundo(string nombreMundo);
-    bool codigoEjecutandose = true;
 
     // relacionado con el mundo
+    bool codigoEjecutandose = true;
     void abrirMundo();
     void crearMapa();
     void imprimirMapa();
+    void getMundosEjecutados();
+    std::vector<char> poblacionInicial(int largoSA);
+    void restablecerAjustes();
+
+    vector<char> comprobarSolucion(vector<char> solucion);
 
     // relacionado con el movimiento
     void moverDerecha();
@@ -36,18 +41,18 @@ public:
     // relacionado con mario
     void getPosicionActual();
     void getEstadoMario();
-
-
-private:
-    //  relacionado con el mundo 
-    string nombreMundo;
+    bool corroborarSolucion(vector<char> solucion);
     int largoMundo;
     int anchoMundo;
+
+private:
+    //  relacionado con el mundo
+    string nombreMundo;
     int bloqueReemplazado; // bloque que es reemplazado cuando mario se mueve en el
     int **mapa = nullptr;
-    void restablecerAjustes();
+    int mundosEjecutados = 0;
 
-    //  relacionado con mario 
+    //  relacionado con mario
     // posicionAnterior: derecha, izquierda, arriba, abajo, es la posicion anterior de mario para saber de donde proviene
     // util para el enfrentamiento de un enemigo
     string posicionAnterior = "inicio";
@@ -55,7 +60,7 @@ private:
     int posicionActual[2]; // coordenadas fila, columna
     void setEstadoMario(string estado);
 
-    //  relacionado con el movimiento 
+    //  relacionado con el movimiento
     bool movimientoEjecutandose = false;
     int movimientosRestantes = 0;
     vector<char> movimientosMario;
@@ -80,6 +85,7 @@ private:
 Mundo::Mundo(string nombreMundo)
 {
     this->nombreMundo = nombreMundo;
+    abrirMundo();
 }
 
 /**
@@ -184,12 +190,12 @@ void Mundo::checkeoColisionLimites()
     {
         if (posicionActual[1] == largoMundo - 1)
         {
-            setEstadoMario("Ganador");
+            setEstadoMario("ganador");
         }
         // mario muere si se cae al vacio
         else if (posicionActual[0] == anchoMundo - 1)
         {
-            setEstadoMario("Muerto: caida al vacio");
+            setEstadoMario("muerto");
         }
     }
 }
@@ -210,9 +216,11 @@ void Mundo::getEstadoMario()
 void Mundo::setEstadoMario(string estado)
 {
     estadoMario = estado;
-    getEstadoMario();
     codigoEjecutandose = false;
-    restablecerAjustes();
+    mundosEjecutados++;
+    //getEstadoMario();
+    //imprimirMapa();
+    // restablecerAjustes();
 }
 
 /**
@@ -230,7 +238,7 @@ void Mundo::checkeoColisionEnemigos()
 {
     if (estadoMario == "vivo" && bloqueReemplazado == 2 && posicionAnterior != "arriba")
     {
-        setEstadoMario("Muerto: choco con un enemigo desde " + posicionAnterior);
+        setEstadoMario("muerto");
     }
 }
 
@@ -313,7 +321,7 @@ void Mundo::movimientoUnitarioArriba()
 {
     if (movimientoEjecutandose)
     {
-        getPosicionActual();
+        // getPosicionActual();
         posicionAnterior = "abajo";
         int fila = posicionActual[0] - 1;
         int columna = posicionActual[1];
@@ -369,7 +377,7 @@ void Mundo::actualizarPosicionMario(int fila, int columna)
         movimientoEjecutandose = false;
     }
 
-    if ((fila < 0 && posicionAnterior == "derecha") || (fila < 0 && posicionAnterior == "abajo"))
+    if ((fila < 0 && posicionAnterior == "derecha") || (fila < 0 && posicionAnterior == "abajo") || (posicionActual[1] == 0 && posicionAnterior == "derecha"))
     {
         // limite izquierda o derecho, no lo muevo
         movimientoEjecutandose = false;
@@ -382,16 +390,16 @@ void Mundo::actualizarPosicionMario(int fila, int columna)
     else if (mapa[fila][columna] != 1)
     {
         bloqueReemplazado = mapa[fila][columna];
-        //cout << "Bloque reemplazado: " << bloqueReemplazado << endl;
+        // cout << "Bloque reemplazado: " << bloqueReemplazado << endl;
         mapa[posicionActual[0]][posicionActual[1]] = 0;
         posicionActual[0] = fila;
         posicionActual[1] = columna;
         mapa[fila][columna] = 3;
-        imprimirMapa();
+        //imprimirMapa();
     }
     else
     {
-        //cout << "choque bloque 1, bajando..." << endl;
+        // cout << "choque bloque 1, bajando..." << endl;
         movimientosRestantes = 0;
         movimientoEjecutandose = false;
     }
@@ -429,11 +437,86 @@ void Mundo::getMovimientosMario()
     }
 }
 
-void Mundo::restablecerAjustes(){
+void Mundo::restablecerAjustes()
+{
     posicionAnterior = "inicio";
     estadoMario = "vivo";
     movimientoEjecutandose = false;
     movimientosRestantes = 0;
     movimientosMario.clear();
     abrirMundo();
+}
+
+void Mundo::getMundosEjecutados()
+{
+    cout << mundosEjecutados << endl;
+}
+
+vector<char> Mundo::poblacionInicial(int largoSA)
+{
+    vector<char> poblacion;
+
+    int numeroAleatorio;
+    int largoSolucionAleatorio = rand() % largoSA + 1;
+    for (int i = 0; i < largoSolucionAleatorio; i++)
+    {
+        numeroAleatorio = rand() % 4;
+        switch (numeroAleatorio)
+        {
+        case 0:
+            poblacion.push_back('d');
+            break;
+        case 1:
+            poblacion.push_back('i');
+            break;
+        case 2:
+            poblacion.push_back('s');
+            break;
+        case 3:
+            poblacion.push_back('j');
+            break;
+
+        default:
+            break;
+        }
+    }
+    return poblacion;
+}
+
+vector<char> Mundo::comprobarSolucion(vector<char> solucion)
+{
+    restablecerAjustes();
+    vector<char> solucionC2;
+    vector<char> solucionParcial;
+
+
+    for (int i = 0; i < solucion.size(); i++)
+    {
+        switch (solucion[i])
+        {
+        case 'd':
+            moverDerecha();
+            break;
+        case 'i':
+            moverIzquierda();
+            break;
+        case 's':
+            moverSaltoAlto();
+            break;
+        case 'j':
+            moverSaltolargo();
+            break;
+        }
+        solucionParcial.push_back(solucion[i]);
+        //cout << solucion[i] << " ";
+        if (estadoMario == "muerto")
+        {
+            return solucionC2;
+        }
+        else if (estadoMario == "ganador")
+        {
+            return solucionParcial;
+        }
+    }
+    return solucionC2;
 }

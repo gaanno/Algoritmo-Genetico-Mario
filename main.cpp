@@ -3,38 +3,62 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include "Mundo.h"
-
+#include <cstdlib>
+#include <ctime>
 using namespace std;
 
+void imprimirVector(vector<char> vector);
 int main()
 {
-    // nombre del archivo que contiene el mapa
-    // al terminar hay que cambiarlo por world.txt
-    string nombreArchivo = "./archivos/ag2.txt";
-
-    // crea objetos
+    srand(time(NULL));
+    string nombreArchivo = "./archivos/ag2o.txt";
     Mundo mundo(nombreArchivo);
+    vector<vector<char>> solucionesParciales;
+    vector<vector<char>> solucionesValidas;
+    vector<char> solucionArtificial;
 
-    // mundo.moverDerecha();
-    mundo.abrirMundo();
-    //mundo.imprimirMapa();
 
-    
-    //mundo.moverDerecha();
-    mundo.moverDerecha();
+    int numeroSolucionesParciales = 100000;
+    int indice;
+    int largoSolucion = 2*mundo.largoMundo;
 
-    //mundo.moverIzquierda();
-    mundo.moverSaltoAlto();
-    mundo.moverDerecha();
-    mundo.moverDerecha();
+    // rellena con soluciones parciales
+    for (indice = 0; indice < numeroSolucionesParciales; indice++)
+    {
+        vector<char> solucionParcial = mundo.poblacionInicial(largoSolucion);
+        solucionesParciales.push_back(solucionParcial);
+    }
 
-    //mundo.getEstadoMario();
-    //mundo.moverSaltolargo();
-    mundo.getMovimientosMario();
-   mundo.imprimirMapa();
 
+    // verifica si las soluciones parciales son validas
+    for (indice = 0; indice < solucionesParciales.size(); indice++)
+    {
+        vector<char> sol = mundo.comprobarSolucion(solucionesParciales[indice]);
+        if (sol.size() > 0)
+        {
+            solucionesValidas.push_back(sol);
+        }
+    }
+
+    for (indice = 0; indice < solucionesValidas.size(); indice++)
+    {
+        imprimirVector(solucionesValidas[indice]);
+    }
+    cout << "Numero soluciones validas: " << solucionesValidas.size() << endl;
+    cout  << "largo: "<< solucionesValidas.size();
+    // imprime las soluciones validas verificadas
 
     // movimiento.getEstadoMario();
     return 0;
+}
+
+void imprimirVector(vector<char> vector)
+{
+    for (int indice = 0; indice < vector.size(); indice++)
+    {
+        cout << vector[indice] << " ";
+    }
+    cout << endl << endl;
 }
